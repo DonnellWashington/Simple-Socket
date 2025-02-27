@@ -9,7 +9,7 @@ void dieWithUserMessage(const char *msg, const char *detail);             // HAN
 
 void DieWithSystemMessage(const char *msg, const char * detail);            // MIGHT NEED TO HANDLING ERROR WITH SYS MESSAGE
 
-void PrintSocketAddress(const struct sockAddr *address, FILE *stream);      //WE PROB WONT NEED THIS
+//void PrintSocketAddress(const struct sockAddr *address, FILE *stream);      //WE PROB WONT NEED THIS
 
 bool SockAddrsEqual(const struct sockaddr *addr1, const st);                //PROB WONT NEED THIS EITHER
 
