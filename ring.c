@@ -18,3 +18,10 @@ int setupTCPServerSocket(const char *service);                              // C
 int accpetTCPConnection(int clntSock);
 
 int setupTCPClientSocket(const char *server, const char *service);
+
+
+int main(int argc, char *argv[]){
+
+    return 0;
+
+}
