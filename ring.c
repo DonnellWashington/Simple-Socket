@@ -67,12 +67,19 @@ int main(int argc, char *argv[]){
             perror("Accept failed");
             continue;
         }
-        
+
+        printf("New connection from %s:%d\n", inet_ntoa(address.sin_addr), ntohs(address.sin_port));
+
+        // WE WILL HANDLE SENDING A RECEIVING NEW FILES HERE...
+
+
+
+        close(new_socket);
 
     }
     
     
-
+    close(server_fd);
 
     return 0;
 
