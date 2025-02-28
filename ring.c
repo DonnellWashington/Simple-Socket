@@ -41,6 +41,14 @@ int main(int argc, char *argv[]){
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = inet(server_ip);
     address.sin_port = htons(port);
+
+    // BIND SOCKET TO IP AND PORT NUMBER 
+    if (bind(server_fd, (struct sockaddr *) &address, sizeof(address)) < 0){
+        perror("Bind failed");
+        exit(EXIT_FAILURE);
+    }
+
+
     
 
 
