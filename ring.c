@@ -115,7 +115,7 @@ int main(int argc, char *argv[]){
         reverse(filename);
         run_client(server_ip, port, filename, 1);
     }
-    else if (condition)
+    else if (strcmp(role, "C" == 0))
     {
         printf("Last computer C\n");
         run_server(port, filename, 0);
