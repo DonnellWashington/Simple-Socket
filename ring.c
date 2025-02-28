@@ -49,6 +49,28 @@ int main(int argc, char *argv[]){
     }
 
 
+    if(listen(server_fd, MAX) < 0){
+        perror("Listne failed");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Listening on %s:%d\n", server_ip, port);
+    printf("Expecting clients: %s:%s\n", client1_ip, client2_ip);
+    printf("File to send: %s:\n", filename);
+
+
+    // ACCEPT INCOMING CONNECTIONS
+    while (1){
+        new_socket = accept(server_fd, (struct sockaddr *) &address, &addrlen);
+
+        if (new_socket < 0){
+            perror("Accept failed");
+            continue;
+        }
+        
+
+    }
+    
     
 
 
