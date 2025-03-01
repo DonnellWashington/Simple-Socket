@@ -21,59 +21,91 @@ void run_server(int port, char *filename, int final){
     struct sockaddr_in address;
     socklen_t addrlen = sizeof(address);
 
-
-    server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1){
-        perror("Socket failed");
-        exit(EXIT_FAILURE);
-    }
-    
-    // IP VERSION, ADDRESS, AND PORT NUMBER
+    server_fd = socket(AF_INET, SOCK_STREAM);
     address.sin_family = AF_INET;
     address.sin_addr.s_addr = INADDR_ANY;
     address.sin_port = htons(port);
 
-    // BIND SOCKET TO IP AND PORT NUMBER 
-    if (bind(server_fd, (struct sockaddr *) &address, sizeof(address)) < 0){
-        perror("Bind failed");
-        exit(EXIT_FAILURE);
-    }
-    
-    if(listen(server_fd, MAX) < 0){
-        perror("Listne failed");
-        exit(EXIT_FAILURE);
-    }
+    bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+    listen(server_fd, 1);
+    new_socket = accept(server_fd, (struct sockaddr *)&address, &addrlen);
 
+    unsigned char received_hash[SHA224_DIGEST_LENGTH];
+    recv(new_socket, received_hash, SHA224_DIGEST_LENGTH, 0);
 
-    printf("Listening on port %d...\n", port);
-    
+    FILE *file = fopen(filename, "wb");
+    char buffer[BUFFER];
+    int bytesRead;
 
-    // ACCEPT CLINET CONNECTIONS
-    new_socket = accept(server_fd, (struct sockaddr *) &address, &addrlen);
-
-    if (new_socket < 0){
-        perror("Accept failed");
-        exit(EXIT_FAILURE);
+    while((bytesRead = recv(new_socket,buffer, BUFFER, 0)) > 0){
+        fwrite(buffer, 1, bytesRead, file);
     }
 
-    
-    printf("client conneted!\n");
-
-    // CLOSE SOCKETS AFTER COMMUNCATION
+    fclose(file);
     close(new_socket);
     close(server_fd);
+
+    unsigned char computed_hash[SHA512_DIGEST_LENGTH];
+    hashit(filename, computed_hash);
 
 }
 
 // STARTING THE CLIENT
 void run_client(char *server_ip, int port, char *filename, int reversing){
 
+    int sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    struct sockaddr_in server_addr;
 
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_port = htons(port);
+    inet_pton(AF_INET, server_ip, &server_addr.sin_addr);
+
+    connect(sockfd, (struct sockaddr *) &server_addr, sizeof(server_addr));
+
+    unsigned char hash[SHA512_DIGEST_LENGTH];
+    hashit(filename, hash);
+
+
+    FILE *file = fopen(filename, "rb");
+    char buffer[BUFFER];
+
+    send(sockfd, hash, SHA224_DIGEST_LENGTH, 0);
+
+    while (fread(buffer, 1, BUFFER, file) > 0){
+        send(sockfd, buffer, BUFFER, 0);
+    }
+
+    fclose(file);
+    close(sockfd);
 
 }
 
 // CREATING THE HAS FOR THE FILE
-void hashit(const char *filename, unsigned char *hash);
+void hashit(const char *filename, unsigned char *hash){
+
+    FILE *file = fopen(filename, "rb");
+
+    if (!file){
+        perror("File cant be opened");
+        exit(EXIT_FAILURE);
+    }
+
+    SHA512_CTX sha_ctx;
+    SHA512_Init (&sha_ctx);
+
+    unsigned char buffer[1024];
+    size_t bytesRead;
+
+    while ((bytesRead = fread(buffer, 1, sizeof(buffer), file)) > 0){
+        SHA512_Update(&sha_ctx, buffer, bytesRead);
+    }
+
+    fclose(file);
+
+    SHA512_Final(hash, &sha_ctx);
+    
+
+}
 
 // PRINT THE HASH
 void printHash(unsigned char *hash){
